@@ -1,0 +1,23 @@
+[project]
+name = "bfgbot"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "ItsBeltaine",email = "et.faucher@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "black (>=25.1.0,<26.0.0)",
+    "flake8 (>=7.1.2,<8.0.0)",
+    "discord-py (>=2.5.2,<3.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)"
+]
+
+[tool.poetry]
+packages = [{include = "bfgbot", from = "src"}]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

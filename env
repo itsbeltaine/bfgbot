@@ -1,0 +1,4 @@
+# Rename to .env
+
+DISCORD_TOKEN=<TOKEN>
+DISCORD_GUILD=BFG-Team
