@@ -26,7 +26,7 @@ class BFG_Bot(discord.Client):
         if message.author == self.user or message.author.bot:
             return
 
-        channelsToListenIn = ["bfg-bot", "bfg-bot"]
+        channelsToListenIn = ["bfg-bot"]
 
         if message.channel.name not in channelsToListenIn:
             return
