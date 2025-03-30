@@ -2,7 +2,6 @@ import discord
 from bfgbot.bfg_bot_db_client import BFG_Bot_DB_Client, BFG_Bot_DB_Parameters
 from bfgbot.morceaux_robots_repository import morceaux_robots_repository
 from bfgbot.discord_classes import Discord_Handle
-from discord.ext import commands
 from typing import List
 
 
@@ -26,25 +25,31 @@ class BFG_Bot(discord.Client):
     async def on_message(self, message: discord.Message):
         if message.author == self.user or message.author.bot:
             return
-        
-        channelsToListenIn = ["bfg-bot"]
+
+        channelsToListenIn = ["bfg-bot", "bfg-bot"]
 
         if message.channel.name not in channelsToListenIn:
             return
-        
+
         if message.content.startswith("!help"):
             await self.on_help(message)
 
         if message.content.startswith("!robot"):
             await self.on_robot(message)
-    
+
+        if message.content.startswith("!totals"):
+            await self.on_totals(message)
+
     async def on_help(self, message: discord.Message):
         await message.channel.send(
-"""# BFG Bot Help Manual
+            """# BFG Bot Help Manual
 **!help** - Tu viens de le faire, dummy.
-**!robot** - Tu donnes des morceaux de robot! 
+**!robot** - Tu donnes des morceaux de robot!
     Ex: !robot @BFG-Bot @BFG-Bot2 3
-""")
+**!totals** - Tu peux savoir tes stats de morceaux de robot!
+    Ex: !totals
+"""
+        )
 
     async def on_robot(self, message: discord.Message):
         content = message.content.replace("!robot", "").strip()
@@ -53,13 +58,15 @@ class BFG_Bot(discord.Client):
         morceaux = None
 
         for arg in args:
-            try: 
+            try:
                 morceaux = int(arg)
-            except:
+            except Exception:
                 continue
-        
+
         if morceaux is None or morceaux <= 0:
-            await message.channel.send("Pas capable de savoir combien de morceaux tu veux envoyer!")
+            await message.channel.send(
+                "Pas capable de savoir combien de morceaux tu veux envoyer!"
+            )
 
         mentions: List[str] = []
         repo = morceaux_robots_repository(self.db_client)
@@ -78,7 +85,25 @@ class BFG_Bot(discord.Client):
             mentions.append(f"<@{mention.id}>")
 
         mentions_string = ", ".join(mentions)
-        await message.channel.send(f"<@{message.author.id}> a envoyé {morceaux} morceaux de robot à {mentions_string}!")
+        await message.channel.send(
+            f"<@{message.author.id}> a envoyé {morceaux} morceaux de robot à {mentions_string}!"
+        )
+
+    async def on_totals(self, message: discord.Message):
+        repo = morceaux_robots_repository(self.db_client)
+
+        totals = repo.get_totals(
+            Discord_Handle(message.author.id, message.author.global_name),
+        )
+
+        if totals is None:
+            await message.channel.send(
+                "J'ai pas été capable de retrouver tes morceaux de robot, sorry man."
+            )
+
+        await message.channel.send(
+            (f"<@{message.author.id}> a {totals.total} morceaux de robot en total, a envoyé {totals.total_given} morceaux de robot à du monde et a reçu {totals.total_received} de plein de beau monde!")
+        )
 
     @staticmethod
     def getIntents() -> discord.Intents:

@@ -1,6 +1,4 @@
 import os
-import discord
-from discord.ext import commands
 from bfgbot.bfg_bot import BFG_Bot
 from bfgbot.bfg_bot_db_client import BFG_Bot_DB_Parameters
 from dotenv import load_dotenv
