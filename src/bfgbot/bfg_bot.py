@@ -65,7 +65,7 @@ class BFG_Bot(discord.Client):
 
         if morceaux is None or morceaux <= 0:
             await message.channel.send(
-                "Pas capable de savoir combien de morceaux tu veux envoyer!"
+                "Pas capable de savoir combien de morceaux tu veux envoyé!"
             )
 
         mentions: List[str] = []
