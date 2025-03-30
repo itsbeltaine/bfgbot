@@ -1,4 +1,4 @@
-from contextlib import contextmanager
+from bfgbot.db_responses.user_totals import user_totals
 from psycopg2.extensions import cursor
 import psycopg2.extras
 from psycopg2 import sql
@@ -117,32 +117,64 @@ class BFG_Bot_DB_Client:
         query_total_given = sql.SQL(query_string_total_given)
         query_total_received = sql.SQL(query_string_total_received)
 
-        with self._get_cursor() as curs:
-            curs.execute(
-                query_audit,
-                {
-                    "giver": giver.discord_id,
-                    "receiver": receiver.discord_id,
-                    "morceaux": morceaux,
-                },
-            )
+        try:
+            with self._get_cursor() as curs:
+                curs.execute(
+                    query_audit,
+                    {
+                        "giver": giver.discord_id,
+                        "receiver": receiver.discord_id,
+                        "morceaux": morceaux,
+                    },
+                )
 
-            curs.execute(
-                query_total_given,
-                {
-                    "giver_id": giver.discord_id,
-                    "giver_name": giver.global_name,
-                    "morceaux": morceaux,
-                },
-            )
+                curs.execute(
+                    query_total_given,
+                    {
+                        "giver_id": giver.discord_id,
+                        "giver_name": giver.global_name,
+                        "morceaux": morceaux,
+                    },
+                )
 
-            curs.execute(
-                query_total_received,
-                {
-                    "receiver_id": receiver.discord_id,
-                    "receiver_name": receiver.global_name,
-                    "morceaux": morceaux,
-                },
-            )
+                curs.execute(
+                    query_total_received,
+                    {
+                        "receiver_id": receiver.discord_id,
+                        "receiver_name": receiver.global_name,
+                        "morceaux": morceaux,
+                    },
+                )
 
-            self._conn.commit()
+                self._conn.commit()
+                return True
+        except Exception:
+            return False
+
+    def get_totals(self, user: Discord_Handle) -> user_totals:
+        query_string = """
+            SELECT
+                discord_id,
+                total,
+                total_given,
+                total_received
+            FROM
+                mr.total
+            WHERE
+                mr.total.discord_id = %(requester)s
+            """
+
+        query = sql.SQL(query_string)
+        try:
+            with self._get_cursor() as curs:
+                curs.execute(query, {"requester": str(user.discord_id)})
+                totals = curs.fetchone()
+                return user_totals(
+                    discord_handle=user,
+                    total=totals[1],
+                    total_given=totals[2],
+                    total_received=totals[3],
+                )
+
+        except Exception:
+            return None
